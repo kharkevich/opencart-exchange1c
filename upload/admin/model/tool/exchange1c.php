@@ -77,9 +77,15 @@ class ModelToolExchange1c extends Model {
 				$product_counter = 0;
 				foreach ($products as $product) {
 					$id = $this->get1CProductIdByProductId($product['product_id']);
-					
+
+					//Формирование необходимого ИД для узнавания 1С своих характеристик
+					//$product['order_product_id']
+					$tmp_product_option = $this->getProductOptionFromOrderProductId($product['order_product_id']);
+					$tmp_1c_option_id = $this->get1COptionIdByOPtionValueId($tmp_product_option);
+					$this->log->write("Для товара " . $product['order_product_id'] . " Определена опция " . $tmp_product_option . " и ИД для 1С : " . $tmp_1c_option_id );
+
 					$document['Документ' . $document_counter]['Товары']['Товар' . $product_counter] = array(
-						 'Ид'             => $id
+						 'Ид'             => $id . "#" . $tmp_1c_option_id
 						,'Наименование'   => $product['name']
 						,'ЦенаЗаЕдиницу'  => $product['price']
 						,'Количество'     => $product['quantity']
@@ -215,9 +221,12 @@ class ModelToolExchange1c extends Model {
 					$data = array();
 					$data['price'] = 0;
 					
-					//UUID без номера после #
+					//UUID товара без номера после #
 					$uuid = explode("#", $offer->Ид);
 					$data['1c_id'] = $uuid[0];
+					//UUID характеристики (в 1С) - она же опция для товара в OpenCart (нужно для склейки в заказе при использовании опций)
+					//$uuid[1];
+					//загнать в таблицу соответствия option_value_id - 1c_option_id и попробовать собирать обратно в товаре
 					if ($enable_log)
 						$this->log->write("Товар: [UUID]:" . $data['1c_id']);
 	
@@ -297,11 +306,15 @@ class ModelToolExchange1c extends Model {
 							}
 							
 							if ($enable_log) $this->log->write(" Найдены характеристики: " . $name_1c . " -> " . $value_1c);
-	
+
 							$option_id = $this->setOption($name_1c);
-							
 							$option_value_id = $this->setOptionValue($option_id, $value_1c, $name_1c);
-							
+
+							//Сопоставление опции в opencart с храктеристикой номенклатуры в 1С
+							if ($enable_log) $this->log->write(" Для характеристики: " . $uuid[1] . " ее нужно пихать в базу с индексом " . $option_value_id);
+							if ($enable_log) $this->log->write("INSERT INTO " . DB_PREFIX . "option_value_to_1c SET option_value_id = '" . $option_value_id . "', 1c_option_value_id = '" . $uuid[1] ."'");
+							$this->db->query("INSERT INTO " . DB_PREFIX . "option_value_to_1c SET option_value_id = '" . $option_value_id . "', 1c_option_value_id = '" . $uuid[1] . "'");
+
 							$product_option_value_data[] = array(
 								'option_value_id'         => (int) $option_value_id,
 								'product_option_value_id' => '',
@@ -519,6 +532,7 @@ class ModelToolExchange1c extends Model {
                                         $data['manufacturer_id'] = $query->row['manufacturer_id'];
                                 }
 									else {
+										//Загрузка (добавление в базу записей) изображений для производителей
 										if ($this->config->get('autofill_image_manufacturers_path')) { $manufacturer_name_image_path = "data/" . $this->config->get('autofill_image_manufacturers_path') . "/"  .  $this->transString($manufacturer_name) . ".jpg" ; } else { $manufacturer_name_image_path = ''; }
 													$data_manufacturer = array(
 														'name'                  => $manufacturer_name,
@@ -1157,6 +1171,40 @@ class ModelToolExchange1c extends Model {
 	}
 
 	/**
+	 * Получает product_option_value_id из order_product_id
+	 *
+	 * @param	int
+	 * @return	string|bool
+	 */
+	private function getProductOptionFromOrderProductId($order_product_id) {
+		$query = $this->db->query('SELECT product_option_value_id FROM ' . DB_PREFIX . 'order_option WHERE `order_product_id` = ' . $order_product_id);
+
+		if ($query->num_rows) {
+			return $query->row['product_option_value_id'];
+		}
+		else {
+			return false;
+		}
+	}
+
+	/**
+	 * Получает 1c_option_value_id из option_value_id
+	 *
+	 * @param	int
+	 * @return	string|bool
+	 */
+	private function get1COptionIdByOPtionValueId($option_value_id) {
+		$query = $this->db->query('SELECT 1c_option_value_id FROM ' . DB_PREFIX . 'option_value_to_1c WHERE `option_value_id` = ' . $option_value_id);
+
+		if ($query->num_rows) {
+			return $query->row['1c_option_value_id'];
+		}
+		else {
+			return false;
+		}
+	}
+
+	/**
 	 * Получает 1c_id из product_id
 	 *
 	 * @param	int
@@ -1366,6 +1414,10 @@ class ModelToolExchange1c extends Model {
 			$this->db->query('TRUNCATE TABLE `' . DB_PREFIX . 'option_value`');
 			if ($enable_log)
 				$this->log->write('TRUNCATE TABLE `' . DB_PREFIX . 'option_value`');
+			//Очистка характеристик
+			$this->db->query('TRUNCATE TABLE `' . DB_PREFIX . 'option_value_to_1c`');
+			if ($enable_log)
+				$this->log->write('TRUNCATE TABLE `' . DB_PREFIX . 'option_value_to_1c`');
 			$this->db->query('TRUNCATE TABLE `' . DB_PREFIX . 'order_option`');
 			if ($enable_log)
 				$this->log->write('TRUNCATE TABLE `' . DB_PREFIX . 'order_option`');
@@ -1507,6 +1559,22 @@ class ModelToolExchange1c extends Model {
 						) ENGINE=MyISAM DEFAULT CHARSET=utf8'
 			);
 		}
+
+		$query = $this->db->query('SHOW TABLES LIKE "' . DB_PREFIX . 'option_value_to_1c"');
+
+		if(!$query->num_rows) {
+			$this->db->query(
+					'CREATE TABLE
+						`' . DB_PREFIX . 'option_value_to_1c` (
+							`option_value_id` int(11) NOT NULL,
+							`1c_option_value_id` varchar(255) NOT NULL,
+							KEY (`option_value_id`),
+							KEY `1c_id` (`1c_option_value_id`),
+							FOREIGN KEY (option_value_id) REFERENCES '. DB_PREFIX .'option_value(option_value_id) ON DELETE CASCADE
+						) ENGINE=MyISAM DEFAULT CHARSET=utf8'
+			);
+		}
+
 	}
 
 }
