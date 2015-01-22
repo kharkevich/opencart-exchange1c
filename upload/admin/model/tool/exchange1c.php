@@ -1424,9 +1424,9 @@ class ModelToolExchange1c extends Model {
 			$this->db->query('TRUNCATE TABLE `' . DB_PREFIX . 'option_value_to_1c`');
 			if ($enable_log)
 				$this->log->write('TRUNCATE TABLE `' . DB_PREFIX . 'option_value_to_1c`');
-			$this->db->query('TRUNCATE TABLE `' . DB_PREFIX . 'order_option`');
-			if ($enable_log)
-				$this->log->write('TRUNCATE TABLE `' . DB_PREFIX . 'order_option`');
+//			$this->db->query('TRUNCATE TABLE `' . DB_PREFIX . 'order_option`');
+//			if ($enable_log)
+//				$this->log->write('TRUNCATE TABLE `' . DB_PREFIX . 'order_option`');
 			$this->db->query('TRUNCATE TABLE `' . DB_PREFIX . 'option`');
 			if ($enable_log)
 				$this->log->write('TRUNCATE TABLE `' . DB_PREFIX . 'option`');
