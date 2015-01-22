@@ -81,3 +81,7 @@ $_['type_created_options_picture']	='Picture';
 //Autoload manufacturers images
 $_['autofill_image_manufacturers']	= 'Automatically assign pictures for manufacturers';
 $_['autofill_image_manufacturers_help']	= 'Assign JPG pictures from preferences folder';
+
+//Export orders with Options
+$_['export_orders_to_1c_with_option']	= 'Export orders to 1C:Enterprise with Product Options';
+$_['export_orders_to_1c_with_option_help']	= 'Experemental features! If checked All should be exported to 1C with options';

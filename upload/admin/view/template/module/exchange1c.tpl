@@ -245,6 +245,15 @@
             </tr>
 
             <tr>
+              <td><label for="orders_to_1c_with_option"><?php echo $export_orders_to_1c_with_option; ?></label></td>
+              <td>
+                <input type="checkbox" value="1" id="orders_to_1c_with_option" name="orders_to_1c_with_option" <?php echo ($orders_to_1c_with_option == 1)? 'checked' : ''; ?>>
+		<span class="help"><?php echo $export_orders_to_1c_with_option_help; ?></span>
+              </td>
+            </tr>
+
+
+            <tr>
               <td><label for="exchange1c_apply_watermark"><?php echo $entry_apply_watermark; ?></label></td>
               <td>
                 <input type="checkbox" value="1" id="exchange1c_apply_watermark" name="exchange1c_apply_watermark" <?php echo ($exchange1c_apply_watermark == 1)? 'checked' : ''; ?>>

@@ -19,7 +19,7 @@ class ControllerModuleExchange1c extends Controller {
 			$this->redirect($this->url->link('extension/module', 'token=' . $this->session->data['token'], 'SSL'));
 		}
 
-		$this->data['version'] = 'Version 1.6.0.1';
+		$this->data['version'] = 'Version 1.6.1.1';
 
 		$this->data['heading_title'] = $this->language->get('heading_title');
 		$this->data['entry_username'] = $this->language->get('entry_username');
@@ -49,6 +49,8 @@ class ControllerModuleExchange1c extends Controller {
 		$this->data['type_created_options_picture'] = $this->language->get('type_created_options_picture');
 		$this->data['autofill_image_manufacturers'] = $this->language->get('autofill_image_manufacturers');
 		$this->data['autofill_image_manufacturers_help'] = $this->language->get('autofill_image_manufacturers_help');
+		$this->data['export_orders_to_1c_with_option'] = $this->language->get('export_orders_to_1c_with_option');
+		$this->data['export_orders_to_1c_with_option_help'] = $this->language->get('export_orders_to_1c_with_option_help');
 		$this->data['entry_seo_url'] = $this->language->get('entry_seo_url');
 		$this->data['entry_seo_url_deadcow'] = $this->language->get('entry_seo_url_deadcow');
 		$this->data['entry_seo_url_translit'] = $this->language->get('entry_seo_url_translit');
@@ -200,6 +202,13 @@ class ControllerModuleExchange1c extends Controller {
 		}
 		else {
 			$this->data['autofill_image_manufacturers_path'] = $this->config->get('autofill_image_manufacturers_path');
+		}
+
+		if (isset($this->request->post['orders_to_1c_with_option'])) {
+			$this->data['orders_to_1c_with_option'] = $this->request->post['orders_to_1c_with_option'];
+		}
+		else {
+			$this->data['orders_to_1c_with_option'] = $this->config->get('orders_to_1c_with_option');
 		}
 
 

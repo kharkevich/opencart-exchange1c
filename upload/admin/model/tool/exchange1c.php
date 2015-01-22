@@ -78,14 +78,20 @@ class ModelToolExchange1c extends Model {
 				foreach ($products as $product) {
 					$id = $this->get1CProductIdByProductId($product['product_id']);
 
-					//Формирование необходимого ИД для узнавания 1С своих характеристик
-					//$product['order_product_id']
-					$tmp_product_option = $this->getProductOptionFromOrderProductId($product['order_product_id']);
-					$tmp_1c_option_id = $this->get1COptionIdByOPtionValueId($tmp_product_option);
-					$this->log->write("Для товара " . $product['order_product_id'] . " Определена опция " . $tmp_product_option . " и ИД для 1С : " . $tmp_1c_option_id );
-
+					if ($this->config->get('orders_to_1c_with_option')) {
+        					//Формирование необходимого ИД для узнавания 1С своих характеристик
+						//$product['order_product_id']
+						$tmp_product_option = $this->getProductOptionFromOrderProductId($product['order_product_id']);
+						$tmp_1c_option_id = $this->get1COptionIdByOPtionValueId($tmp_product_option);
+						$this->log->write("Для товара " . $product['order_product_id'] . " Определена опция " . $tmp_product_option . " и ИД для 1С : " . $tmp_1c_option_id );
+						$id_to_export = $id . "#" . $tmp_1c_option_id;
+					}
+					else {
+					    $id_to_export = $id;
+					}
+					
 					$document['Документ' . $document_counter]['Товары']['Товар' . $product_counter] = array(
-						 'Ид'             => $id . "#" . $tmp_1c_option_id
+						 'Ид'             => $id_to_export
 						,'Наименование'   => $product['name']
 						,'ЦенаЗаЕдиницу'  => $product['price']
 						,'Количество'     => $product['quantity']
