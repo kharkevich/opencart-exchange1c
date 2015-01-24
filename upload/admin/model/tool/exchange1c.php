@@ -317,7 +317,7 @@ class ModelToolExchange1c extends Model {
 							$option_value_id = $this->setOptionValue($option_id, $value_1c, $name_1c);
 
 							//Сопоставление опции в opencart с храктеристикой номенклатуры в 1С
-							if ($enable_log) $this->log->write(" Для характеристики: " . $uuid[1] . " ее нужно пихать в базу с индексом " . $option_value_id);
+							if ($enable_log) $this->log->write("Товар ". $uuid[0] ." с характеристикой: " . $uuid[1] . " ее нужно пихать в базу с индексом " . $option_value_id);
 							if ($enable_log) $this->log->write("INSERT INTO " . DB_PREFIX . "option_value_to_1c SET option_value_id = '" . $option_value_id . "', 1c_option_value_id = '" . $uuid[1] ."'");
 							$this->db->query("INSERT INTO " . DB_PREFIX . "option_value_to_1c SET option_value_id = '" . $option_value_id . "', 1c_option_value_id = '" . $uuid[1] . "'");
 
