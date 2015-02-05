@@ -1,9 +1,8 @@
 # OpenCart Exchange 1C #
 
  Модуль обмена данными с 1С 8.x в формате CommerceML2 для OpenCart 1.x
+ Поддерживаемая версия протокола CommerceML - 2.05
  
- * Домашняя страница: http://zenwalker.ru/lab/opencart-exchange1c/
- * Исходные коды: https://github.com/ethernet1/opencart-exchange1c
  * Исходные коды данного форка: https://github.com/kharkevich/opencart-exchange1c
  * Тема поддержки: http://opencartforum.ru/topic/15471-opencart-exchange-1c/
 
